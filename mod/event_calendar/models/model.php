@@ -855,6 +855,7 @@ function event_calendar_get_entities_from_metadata_between($meta_start_name, $me
 	}
 	if ($site_guid == 0) {
 		$site_guid = elgg_get_site_entity()->guid;
+
 	}
 
 	$where = array();
@@ -900,7 +901,7 @@ function event_calendar_get_entities_from_metadata_between($meta_start_name, $me
 	if (!$count) {
 		$query = "SELECT distinct e.* ";
 	} else {
-		$query = "SELECT count(distinct e.guid) as total ";
+		$query = "SELECT count(e.guid) as total ";
 	}
 
 	$db_prefix = elgg_get_config('dbprefix');
@@ -932,6 +933,8 @@ function event_calendar_get_entities_from_metadata_between($meta_start_name, $me
 	foreach ($where as $w) {
 		$query .= " $w AND ";
 	}
+
+	$more = "SELECT  * FROM elgg_entity_relationships rela WHERE rela.guid_two = $container_guid AND rela.relationship = 'display_on_group'";
 	$query .= _elgg_get_access_where_sql(array('table_alias' => "e")); // Add access controls
 	$query .= ' AND ' . _elgg_get_access_where_sql(array('table_alias' => "m")); // Add access controls
 	$query .= ' AND ' . _elgg_get_access_where_sql(array('table_alias' => "m2")); // Add access controls
@@ -941,7 +944,23 @@ function event_calendar_get_entities_from_metadata_between($meta_start_name, $me
 		if ($limit) {
 			$query .= " limit $offset, $limit"; // Add order and limit
 		}
+		$more2 = get_data($more);
+		//error_log('query'. print_r($more2, TRUE));
+
+	foreach($more2 as $row) {
+		$query1 = "SELECT distinct e.* FROM elgg_entities e where guid = ".$row->guid_one."";
+		$query2[] = get_data($query1, "entity_row_to_elggstar");
+       	/*$array_test[] = $row->guid_one;
+             error_log( $row->guid_one);*/
+             
+     
+}
+		//error_log('array_test'. print_r($query2, TRUE));
+
+		
 		$entities = get_data($query, "entity_row_to_elggstar");
+		//$entities = $query2;
+		//error_log( print_r('entities'.$entities, TRUE) );
 		if (elgg_get_plugin_setting('add_to_group_calendar', 'event_calendar') == 'yes') {
 			if (get_entity($container_guid) instanceOf ElggGroup) {
 				$entities = event_calendar_get_entities_from_metadata_between_related($meta_start_name, $meta_end_name,
@@ -951,13 +970,40 @@ function event_calendar_get_entities_from_metadata_between($meta_start_name, $me
 					false, false, '-',$entities);
 			}
 		}
+		error_log( print_r($entities, TRUE) );
 		return $entities;
+
 	} else {
+		
+$row1 = get_data_row($more);
+$row2 = get_data_row($query);
+$row3 = ($row1->total + $row2->total);
+
+/*error_log($row1->total);
+error_log($row2->total);
+error_log($row3);*/
+
+error_log('So.....2 '.$query);
+
+		if (elgg_get_plugin_setting('add_to_group_calendar', 'event_calendar') == 'yes') {
+			if (get_entity($container_guid) instanceOf ElggGroup) {
+				$entities = event_calendar_get_entities_from_metadata_between_related($meta_start_name, $meta_end_name,
+					$meta_start_value, $meta_end_value, $entity_type,
+					$entity_subtype, $owner_guid, $container_guid,
+					0, 0, "", 0,
+					false, false, '-',$entities);
+			}
+		}
 		if ($row = get_data_row($query)) {
+			//error_log('count'.$row->total);
+
 			return $row->total;
+			
+
 		}
 	}
 	return false;
+
 }
 
 function event_calendar_has_personal_event($event_guid, $user_guid) {
@@ -1807,6 +1853,7 @@ if (($filter == 'all') && ($page_type != 'group')) {
 	if (($filter == 'all') || ($filter == 'owner')) {
 		$count = event_calendar_get_events_between($start_ts, $end_ts, true, $limit, $offset, $container_guid, $region);
 		$events = event_calendar_get_events_between($start_ts, $end_ts, false, $limit, $offset, $container_guid, $region);
+
 	} else if ($filter == 'open') {
 		$count = event_calendar_get_open_events_between($start_ts, $end_ts, true, $limit, $offset, $container_guid, $region);
 		$events = event_calendar_get_open_events_between($start_ts, $end_ts, false, $limit, $offset, $container_guid, $region);
