@@ -9,11 +9,11 @@
  * GC_MODIFICATION
  * Description: Removed the owners block and extras menu that normally appears on elgg sites
  */
-/*
+
 echo elgg_view_menu('extras', array(
 	'sort_by' => 'priority',
 	'class' => 'elgg-menu-hz',
-));*/
+));
 
 //echo elgg_view('page/elements/owner_block', $vars);
 
