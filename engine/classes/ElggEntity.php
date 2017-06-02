@@ -1618,7 +1618,7 @@ abstract class ElggEntity extends \ElggData implements
 	 * @throws InvalidParameterException If the entity's type has not been set.
 	 * @throws IOException If the new row fails to write to the DB.
 	 */
-	protected function create() {
+	protected function create($enabled = 'yes') {
 		global $CONFIG;
 
 		// Using attribute array directly; get function does something special!
@@ -1665,10 +1665,10 @@ abstract class ElggEntity extends \ElggData implements
 		
 		$result = $this->getDatabase()->insertData("INSERT into {$CONFIG->dbprefix}entities
 			(type, subtype, owner_guid, site_guid, container_guid,
-				access_id, time_created, time_updated, last_action)
+				access_id, time_created, time_updated, last_action, enabled)
 			values
 			('$type', $subtype_id, $owner_guid, $site_guid, $container_guid,
-				$access_id, $time_created, $now, $now)");
+				$access_id, $time_created, $now, $now, '$enabled')");
 
 		if (!$result) {
 			throw new \IOException("Unable to save new object's base entity information!");

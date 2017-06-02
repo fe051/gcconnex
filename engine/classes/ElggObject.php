@@ -129,7 +129,7 @@ class ElggObject extends \ElggEntity {
 	protected function create() {
 		global $CONFIG;
 
-		$guid = parent::create();
+		$guid = parent::create('no');	// have the entity disabled until it's fully created
 		if (!$guid) {
 			// @todo this probably means permission to create entity was denied
 			// Is returning false the correct thing to do
@@ -146,7 +146,7 @@ class ElggObject extends \ElggEntity {
 			// TODO(evan): Throw an exception here?
 			return false;
 		}
-		
+		$this->enable();		// enable the entity now that it's bee fully created
 		return $guid;
 	}
 
