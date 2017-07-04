@@ -117,7 +117,7 @@ function phpmailer_extract_from_email($from) {
  */
 function phpmailer_send($to, $to_name, $subject, $body, array $bcc = NULL, $html = true, array $files = NULL, array $params = NULL) {
 	
-	
+require_once elgg_get_plugins_path() . '/phpmailer/vendors/class.smtp.php';
 require_once elgg_get_plugins_path() . '/phpmailer/vendors/class.phpmailer.php';
 
  
