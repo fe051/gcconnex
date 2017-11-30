@@ -85,6 +85,17 @@ $description_info_en .=
 
 switch ($msg_type) {
 
+	case 'cp_wire_image':
+		elgg_load_library('thewire_image');
+		$wire_entity = $vars['wire_entity'];
+		$wire_image = thewire_image_get_attachments($wire_entity->getGUID());
+		$cp_notify_msg_title_en = elgg_echo('cp_notifications:mail_body:subtype:thewire', array($vars['author']->name, "<a href='{$wire_entity->getURL()}'>fil</a>"), 'en');
+		$cp_notify_msg_title_fr = elgg_echo('cp_notifications:mail_body:subtype:thewire', array($vars['author']->name, "<a href='{$wire_entity->getURL()}'>wire</a>"), 'fr');
+
+		$cp_notify_msg_description_en = "<p>{$wire_entity->description}</p> <br/> <p><img  width=\"320\" src='".elgg_get_site_url().'thewire_image/download/'.$wire_image->getGUID().'/'.$wire_image->original_filename ."'/> </p>";
+		$cp_notify_msg_description_fr = "<p>{$wire_entity->description}</p> <br/> <p><img  width=\"320\" src='".elgg_get_site_url().'thewire_image/download/'.$wire_image->getGUID().'/'.$wire_image->original_filename ."'/> </p>";
+		break;
+
 	case 'cp_content_edit': // blog vs page (edits)
 		$cp_notify_msg_title_fr = (strcmp($vars['cp_en_entity'],'blog') === 0) ? elgg_echo('cp_notify:body_edit:title:m',array($vars['cp_fr_entity']),'fr') : elgg_echo('cp_notify:body_edit:title:f',array($vars['cp_fr_entity']),'fr');
 		$cp_notify_msg_title_en = elgg_echo('cp_notify:body_edit:title',array($vars['cp_en_entity']),'en');
@@ -369,6 +380,12 @@ switch ($msg_type) {
 
 		$cp_topic_description_discussion_en = gc_explode_translation($cp_topic_description_discussion,'en');
 		$cp_topic_description_discussion_fr = gc_explode_translation($cp_topic_description_discussion,'fr');
+
+		if ($vars['cp_topic']->getSubtype() === 'thewire') {
+			$cp_notify_msg_title_en = elgg_echo('cp_notify:body_new_content:title3', array($vars['cp_topic']->getOwnerEntity()->getURL(), $vars['cp_topic']->getOwnerEntity()->name, cp_translate_subtype($vars['cp_topic']->getSubtype())), 'en');
+			$cp_notify_msg_title_fr = elgg_echo('cp_notify:body_new_content:title3', array($vars['cp_topic']->getOwnerEntity()->getURL(), $vars['cp_topic']->getOwnerEntity()->name, cp_translate_subtype($vars['cp_topic']->getSubtype()), false), 'fr');
+			$wire_post_message = "<p>{$vars['cp_topic']->description}</p>";
+		}
 
 		if (strlen($cp_topic_description) > 200) {
 			$cp_topic_description = substr($cp_topic_description, 0, 200);
@@ -792,7 +809,7 @@ echo <<<___HTML
 		        	<h4 style='padding: 0px 0px 5px 0px; font-family:sans-serif';>
 		        		<strong> {$cp_notify_msg_title_en} </strong>
 		        	</h4>
-
+		        	{$wire_post_message}
 		        	{$cp_notify_msg_description_en}
 
 		        </div>
@@ -806,7 +823,7 @@ echo <<<___HTML
 		       			<strong> {$cp_notify_msg_title_fr} </strong>
 		       		</h4>
 
-
+		       		{$wire_post_message}
 		       		{$cp_notify_msg_description_fr}
 
 		        </div>
